@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phân Tích Vay Trả Góp – Điện Mặt Trời Solar + BESS</title>
+    <meta name="description"
+        content="Công cụ tính toán vay trả góp dự án điện mặt trời và lưu trữ năng lượng tại TP.HCM. Dữ liệu giờ nắng từ Global Solar Atlas (Solargis)." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+    <!-- ── HEADER ── -->
+    <header class="site-header">
+        <div class="logo">
+            <span class="logo-icon">☀️</span>
+            <span class="logo-text">Solar Credit Calculator</span>
+            <span class="logo-tag">TP.HCM</span>
+        </div>
+        <nav class="step-nav">
+            <button class="step-btn active" id="nav-step1" onclick="goToPage(1)">
+                <span class="step-num">1</span>
+                <span class="step-label">Thông tin đầu tư</span>
+            </button>
+            <div class="step-arrow">›</div>
+            <button class="step-btn locked" id="nav-step2" onclick="tryGotoPage2()"
+                title="Vui lòng điền đủ thông tin trang 1">
+                <span class="step-num">2</span>
+                <span class="step-label">Bảng phân tích</span>
+                <span class="lock-icon" id="lock-icon">🔒</span>
+            </button>
+        </nav>
+    </header>
+
+    <!-- ══════════════════════════════════════
+       PAGE 1 – INPUT FORM
+  ══════════════════════════════════════ -->
+    <section class="page" id="page1">
+        <div class="page-inner">
+
+            <div class="page-title-wrap">
+                <h1 class="page-title">Thông Tin Đầu Tư</h1>
+                <p class="page-sub">Nhập thông tin phía dưới để tạo bảng phân tích dòng tiền hàng tháng</p>
+            </div>
+
+            <!-- ── SECTION 1: VỐN ĐẦU TƯ ── -->
+            <div class="section-card">
+                <div class="section-header">
+                    <span class="section-num">1</span>
+                    <h2 class="section-title">Vốn đầu tư</h2>
+                </div>
+
+                <div class="row-2col">
+                    <div class="field-group">
+                        <label class="field-label" for="capex-per-kwp">Tổng chi phí</label>
+                        <div class="input-wrap">
+                            <input type="number" id="capex-per-kwp" class="field-input" placeholder="18" min="1"
+                                step="0.5" oninput="calcCapexTotal()" />
+                            <span class="input-unit">tr/kWp</span>
+                        </div>
+                    </div>
+                    <div class="field-group">
+                        <label class="field-label" for="solar-kwp-capex">Công suất hệ thống</label>
+                        <div class="input-wrap">
+                            <input type="number" id="solar-kwp-capex" class="field-input" placeholder="500" min="1"
+                                step="10" oninput="calcCapexTotal()" />
+                            <span class="input-unit">kWp</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row-2col" style="margin-top:4px;">
+                    <div class="field-group">
+                        <label class="field-label">Có hệ thống lưu trữ?</label>
+                        <div class="toggle-yn">
+                            <button class="yn-btn active" id="capex-stor-no"
+                                onclick="setStorage('capex','no')">Không</button>
+                            <button class="yn-btn" id="capex-stor-yes" onclick="setStorage('capex','yes')">Có</button>
+                        </div>
+                    </div>
+                    <div class="field-group storage-field hidden" id="storage-kwh-wrap-capex">
+                        <label class="field-label" for="bat-kwh-capex">Dung lượng lưu trữ</label>
+                        <div class="input-wrap">
+                            <input type="number" id="bat-kwh-capex" class="field-input" placeholder="200" min="0"
+                                step="10" oninput="calcCapexTotal()" />
+                            <span class="input-unit">kWh</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="capex-preview" id="capex-preview">
+                    <span class="preview-label">Tổng vốn đầu tư:</span>
+                    <span class="preview-value" id="capex-total-preview">–</span>
+                </div>
+            </div>
+
+            <!-- ── SECTION 2: CỌC ── -->
+            <div class="section-card">
+                <div class="section-header">
+                    <span class="section-num">2</span>
+                    <h2 class="section-title">Tỷ lệ cọc / Vốn tự có</h2>
+                </div>
+                <div class="row-3col">
+                    <div class="field-group">
+                        <label class="field-label" for="deposit-pct">Tỷ lệ cọc</label>
+                        <div class="input-wrap">
+                            <input type="number" id="deposit-pct" class="field-input" placeholder="30" min="0" max="100"
+                                step="1" oninput="updateDepositPreview()" />
+                            <span class="input-unit">%</span>
+                        </div>
+                    </div>
+                    <div class="field-group">
+                        <label class="field-label" for="loan-years">Số năm trả góp</label>
+                        <div class="input-wrap">
+                            <input type="number" id="loan-years" class="field-input" placeholder="4" min="1" max="20"
+                                step="1" value="4" oninput="updateDepositPreview()" />
+                            <span class="input-unit">năm</span>
+                        </div>
+                    </div>
+                    <div class="deposit-info" id="deposit-info">
+                        <div class="di-row"><span class="di-label">💰 Khoản vay</span><strong class="di-val"
+                                id="di-loan">–</strong></div>
+                        <div class="di-row"><span class="di-label">🔒 Vốn tự có (cọc)</span><strong class="di-val"
+                                id="di-own">–</strong></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── SECTION 3: VỊ TRÍ ── -->
+            <div class="section-card">
+                <div class="section-header">
+                    <span class="section-num">3</span>
+                    <h2 class="section-title">Vị trí lắp đặt – TP. Hồ Chí Minh</h2>
+                </div>
+                <div class="field-group">
+                    <label class="field-label" for="location">Chọn quận / huyện</label>
+                    <select id="location" class="field-input field-select" onchange="updateLocationInfo()">
+                        <option value="">— Chọn quận / huyện —</option>
+                        <optgroup label="Khu vực nội thành (lõi đô thị)">
+                            <option value="q1">Quận 1 (trung tâm)</option>
+                            <option value="q3">Quận 3 (trung tâm)</option>
+                            <option value="q4">Quận 4</option>
+                            <option value="q5">Quận 5</option>
+                            <option value="q6">Quận 6</option>
+                            <option value="q8">Quận 8</option>
+                            <option value="q10">Quận 10</option>
+                            <option value="q11">Quận 11</option>
+                            <option value="pn">Quận Phú Nhuận</option>
+                        </optgroup>
+                        <optgroup label="Khu vực nội thành (mở rộng)">
+                            <option value="q7">Quận 7</option>
+                            <option value="q12">Quận 12</option>
+                            <option value="bt">Quận Bình Thạnh</option>
+                            <option value="gv">Quận Gò Vấp</option>
+                            <option value="tb">Quận Tân Bình</option>
+                            <option value="tp">Quận Tân Phú</option>
+                            <option value="btn">Quận Bình Tân</option>
+                        </optgroup>
+                        <optgroup label="TP. Thủ Đức (quận cũ)">
+                            <option value="q2">Khu vực Quận 2 cũ (TP. Thủ Đức)</option>
+                            <option value="q9">Khu vực Quận 9 cũ (TP. Thủ Đức)</option>
+                            <option value="qtd">Khu vực Quận Thủ Đức cũ (TP. Thủ Đức)</option>
+                        </optgroup>
+                        <optgroup label="Khu vực ngoại thành">
+                            <option value="bc">Huyện Bình Chánh</option>
+                            <option value="cc">Huyện Củ Chi</option>
+                            <option value="hm">Huyện Hóc Môn</option>
+                            <option value="nb">Huyện Nhà Bè</option>
+                            <option value="cg">Huyện Cần Giờ</option>
+                        </optgroup>
+                    </select>
+                </div>
+                <div class="location-info-box hidden" id="location-info-box">
+                    <div class="lib-grid" id="lib-grid"><!-- JS --></div>
+                    <p class="lib-source">📡 Nguồn: Global Solar Atlas (Solargis) · Dữ liệu cập nhật 2025</p>
+                </div>
+            </div>
+
+            <!-- CTA -->
+            <div class="cta-wrap">
+                <button class="cta-btn" id="cta-btn" onclick="validateAndNext()">
+                    Xem Bảng Phân Tích →
+                </button>
+                <p class="cta-note" id="cta-note">Bảng sẽ trình bày dòng tiền theo từng tháng trong suốt thời hạn vay
+                </p>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ══════════════════════════════════════
+       PAGE 2 – ANALYSIS TABLE
+  ══════════════════════════════════════ -->
+    <section class="page hidden" id="page2">
+        <div class="page-inner wide">
+
+            <!-- Info banner -->
+            <div class="info-banner" id="info-banner"><!-- JS --></div>
+
+            <!-- Summary cards -->
+            <div class="summary-row" id="summary-row">
+                <div class="sum-card">
+                    <div class="sum-label">Tổng vốn đầu tư</div>
+                    <div class="sum-val" id="s-capex">–</div>
+                </div>
+                <div class="sum-card">
+                    <div class="sum-label">Khoản vay NH</div>
+                    <div class="sum-val" id="s-loan">–</div>
+                </div>
+                <div class="sum-card">
+                    <div class="sum-label">Vị trí</div>
+                    <div class="sum-val" id="s-loc">–</div>
+                </div>
+                <div class="sum-card">
+                    <div class="sum-label">PVOUT hàng năm</div>
+                    <div class="sum-val" id="s-pvout">–</div>
+                </div>
+                <div class="sum-card highlight">
+                    <div class="sum-label">Lợi nhuận TB/tháng</div>
+                    <div class="sum-val green" id="s-profit">–</div>
+                </div>
+            </div>
+
+            <!-- Monthly chart pills -->
+            <div class="monthly-bar" id="monthly-bar"><!-- JS --></div>
+
+            <!-- Toolbar -->
+            <div class="table-toolbar">
+                <h2 class="table-title">Bảng Phân Tích Dòng Tiền</h2>
+                <div class="toolbar-right">
+                    <button class="tool-btn" onclick="exportExcel()">⬇ Xuất Excel</button>
+                    <button class="tool-btn secondary" onclick="goToPage(1)">← Chỉnh sửa</button>
+                </div>
+            </div>
+
+            <div class="table-wrap">
+                <table class="analysis-table" id="analysis-table">
+                    <thead id="table-head"></thead>
+                    <tbody id="table-body"></tbody>
+                    <tfoot id="table-foot"></tfoot>
+                </table>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- TOAST -->
+    <div class="toast" id="toast"></div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
