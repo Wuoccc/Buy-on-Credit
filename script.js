@@ -54,6 +54,11 @@ const LOCATIONS = {
 const EVN_SOLAR_PRICE = 3638;  // đ/kWh – giá điện kinh doanh (solar)
 const EVN_BAT_PRICE = 5422;  // đ/kWh – giá điện kinh doanh cao điểm (BESS)
 
+// Hệ số giảm sản lượng (Losses/Performance Ratio): 
+// Mùa khô nắng nhiều (T1-T4, T11-T12) giảm 10% (*0.90)
+// Mùa mưa ít nắng (T5-T10) giảm 5% (*0.95)
+const PR_FACTORS = [0.9, 0.9, 0.9, 0.9, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.9, 0.9];
+
 // Gán lại giá cho tất cả vị trí
 Object.values(LOCATIONS).forEach(d => {
   d.solarPrice = EVN_SOLAR_PRICE;
@@ -317,10 +322,11 @@ function buildTable({ total, kwp, hasBess, bessKwh, deposit, locKey }) {
     let bessKwhOut = 0;
 
     if (year === 1) {
-      // Năm 1: theo dữ liệu thực tế (100% sản lượng)
-      solarKwh = loc.pvout_monthly[monthIdx] * kwp;
+      // Năm 1: Áp dụng hệ số giảm PR theo mùa
+      const pr = PR_FACTORS[monthIdx];
+      solarKwh = loc.pvout_monthly[monthIdx] * kwp * pr;
       bessKwhOut = hasBess
-        ? bessKwh * 25 * loc.batCycleEff * (loc.pvout_monthly[monthIdx] / loc.pvout_annual * 12)
+        ? bessKwh * 25 * loc.batCycleEff * (loc.pvout_monthly[monthIdx] / loc.pvout_annual * 12) * pr
         : 0;
       prevSolar[monthIdx] = solarKwh;
       prevBess[monthIdx] = bessKwhOut;
