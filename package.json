@@ -1,0 +1,24 @@
+{
+  "name": "buy-on-credit",
+  "version": "1.0.0",
+  "description": "",
+  "main": "script.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Wuoccc/Buy-on-Credit.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Wuoccc/Buy-on-Credit/issues"
+  },
+  "homepage": "https://github.com/Wuoccc/Buy-on-Credit#readme",
+  "devDependencies": {
+    "gh-pages": "^6.3.0"
+  }
+}
