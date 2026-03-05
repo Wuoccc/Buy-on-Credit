@@ -710,8 +710,6 @@ optgroup {
 /* Table */
 .table-wrap {
   overflow-x: auto;
-  overflow-y: auto;
-  max-height: 75vh;
   border-radius: var(--radius);
   border: 1px solid var(--border);
   box-shadow: var(--shadow-sm);
@@ -724,11 +722,6 @@ optgroup {
   min-width: 1050px;
 }
 
-.analysis-table thead {
-  position: sticky;
-  top: 0;
-  z-index: 20;
-}
 
 .analysis-table thead tr:first-child {
   background: #1e3a5f;
